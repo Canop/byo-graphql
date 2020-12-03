@@ -1,7 +1,7 @@
 [package]
 name = "byo-graphql"
 version = "0.1.0"
-licence = "MIT"
+license = "MIT"
 authors = ["dystroy <denys.seguret@gmail.com>"]
 repository = "https://github.com/Canop/byo-graphql"
 description = "simple bring-your-own graphql client"
