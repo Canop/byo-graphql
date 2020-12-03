@@ -1,9 +1,7 @@
 use {
     anyhow::*,
-    serde::{*, de::DeserializeOwned},
-    std::{
-        collections::HashMap,
-    },
+    serde::{ de::DeserializeOwned, Deserialize, Serialize },
+    std:: collections::HashMap,
 };
 
 /// A client that you may reuse to do several queries
