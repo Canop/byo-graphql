@@ -45,7 +45,7 @@ pub fn main() -> Result<()> {
     );
     println!("query: {}", &query);
     println!("raw answer: {}", graphql_client.text(&query)?);
-    let repo: Repository = graphql_client.get_first(query)?;
+    let repo: Repository = graphql_client.get_first_item(query)?;
     println!("stars: {}", repo.stargazers.totalCount);
     Ok(())
 }

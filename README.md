@@ -24,9 +24,9 @@ A simple *"bring your own queries and types"* GraphQL client.
 
 # How to use it
 
-The [github example](examples/github-stars/main.rs) demonstrates fetching the number of stars of a repository.
+The [github example](examples/github-stars/main.rs) demonstrates querying GitHub's GraphQL API to get the number of stars of a repository.
 
-You create a client, that you may keep and reuse:
+First create a client, that you may keep and reuse:
 
 ```rust
 let mut graphql_client = GraphqlClient::new("https://api.github.com/graphql")?;
@@ -45,6 +45,8 @@ pub struct RepoStargazers {
     totalCount: usize,
 }
 ```
+
+
 And you need a query:
 ```rust
 let query = r#"{
@@ -57,10 +59,10 @@ let query = r#"{
 ```
 **note:** in the example's complete code, the query is dynamically built with `format!`, as you'll usually do.
 
-With this, you can fetch and display the data:
+You now can fetch and display the data:
 
 ```rust
-let repo: Repository = graphql_client.get_first(query)?;
+let repo: Repository = graphql_client.get_first_item(query)?;
 println!("stars: {}", repo.stargazers.totalCount);
 ```
 

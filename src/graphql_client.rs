@@ -58,15 +58,16 @@ impl GraphqlClient {
     }
     /// get the `data` part of the answer in the desired type
     /// (it usually looks like a map)
-    pub fn get<S: Into<String>, D: DeserializeOwned>(&self, query: S) -> Result<D> {
+    pub fn get_data<S: Into<String>, Data: DeserializeOwned>(&self, query: S) -> Result<Data> {
         let res = self.raw(query)?;
-        let response: GraphqlResponse<D> = res.json()?;
+        let response: GraphqlResponse<Data> = res.json()?;
         Ok(response.data)
     }
     /// get the first item in the answer, if present.
-    /// This is a convenience method for the simplest case.
-    pub fn get_first<S: Into<String>, D: DeserializeOwned>(&self, query: S) -> Result<D> {
-        let mut map: HashMap<String, D> = self.get(query)?;
+    /// This is a convenience method for the simplest case, most
+    /// especially for when you query a unique item.
+    pub fn get_first_item<S: Into<String>, Item: DeserializeOwned>(&self, query: S) -> Result<Item> {
+        let mut map: HashMap<String, Item> = self.get_data(query)?;
         let single = map.drain()
             .next()
             .map(|e| e.1)
