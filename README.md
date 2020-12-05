@@ -22,6 +22,12 @@ A simple *"bring your own queries and types"* GraphQL client.
 * I want to manage queries as strings in my Rust code
 * I don't know what I'm doing
 
+# Why not use it
+
+* For now it's experimental, the API will grow and the existing parts will change
+* There's already a popular and well tested [GraphQL client in Rust](https://github.com/graphql-rust/graphql-client)
+* I don't know what I'm doing
+
 # How to use it
 
 The [github example](examples/github-stars/main.rs) demonstrates querying GitHub's GraphQL API to get the number of stars of a repository.
@@ -46,7 +52,6 @@ pub struct RepoStargazers {
 }
 ```
 
-
 And you need a query:
 ```rust
 let query = r#"{
@@ -66,8 +71,3 @@ let repo: Repository = graphql_client.get_first_item(query)?;
 println!("stars: {}", repo.stargazers.totalCount);
 ```
 
-# Why not use it
-
-* There's already a popular and well tested [GraphQL client in Rust](https://github.com/graphql-rust/graphql-client)
-* I only tested basic queries, no mutations
-* I don't know what I'm doing
