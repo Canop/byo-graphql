@@ -24,8 +24,8 @@ A simple *"bring your own queries and types"* GraphQL client.
 
 # Why not use it
 
+* For now it's experimental, the API may grow and change
 * There's already a popular and well tested [GraphQL client in Rust](https://github.com/graphql-rust/graphql-client)
-* I only tested basic queries, no mutations
 * I don't know what I'm doing
 
 # How to use it
@@ -63,7 +63,7 @@ let query = r#"{
 ```
 **note:** in the example's complete code, the query is dynamically built with `format!`, as you'll usually do.
 
-You now can fetch the data:
+Now you can fetch the data:
 
 ```rust
 let repo: Repository = graphql_client.get_first_item(query)?;
