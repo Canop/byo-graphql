@@ -1,5 +1,5 @@
 use {
-    anyhow::*,
+    crate::*,
     serde::{ de::DeserializeOwned, Deserialize, Serialize },
     std:: collections::HashMap,
 };
@@ -18,12 +18,13 @@ struct GraphqlRequest {
 
 #[derive(Debug, Deserialize)]
 struct GraphqlResponse<D> {
-    data: D,
+    data: Option<D>,
+    errors: Option<Vec<GraphqlError>>,
 }
 
 impl GraphqlClient {
     /// create a client
-    pub fn new<S: Into<String>>(url: S) -> Result<Self> {
+    pub fn new<S: Into<String>>(url: S) -> ByoResult<Self> {
         let requester = reqwest::blocking::Client::builder()
             .user_agent("byo/0.1")
             .build()?;
@@ -40,7 +41,7 @@ impl GraphqlClient {
     }
     /// return a raw reqwest Response. You should usually not
     /// need this function
-    pub fn raw<S: Into<String>>(&self, query: S) -> Result<reqwest::blocking::Response> {
+    pub fn raw<S: Into<String>>(&self, query: S) -> ByoResult<reqwest::blocking::Response> {
         let mut builder = self.requester.post(&self.url);
         if let Some(auth) = &self.bearer_auth {
             builder = builder.bearer_auth(auth);
@@ -53,25 +54,26 @@ impl GraphqlClient {
     }
     /// get the server's answer as unparsed text.
     /// This is mainly useful to debug and tune your structures or query
-    pub fn text<S: Into<String>>(&self, query: S) -> Result<String> {
+    pub fn text<S: Into<String>>(&self, query: S) -> ByoResult<String> {
         Ok(self.raw(query)?.text()?)
     }
     /// get the `data` part of the answer in the desired type
     /// (it usually looks like a map)
-    pub fn get_data<S: Into<String>, Data: DeserializeOwned>(&self, query: S) -> Result<Data> {
+    pub fn get_data<S: Into<String>, Data: DeserializeOwned>(&self, query: S) -> ByoResult<Data> {
         let res = self.raw(query)?;
         let response: GraphqlResponse<Data> = res.json()?;
-        Ok(response.data)
+        if let Some(errors) = response.errors {
+            Err(ByoError::Graphql(errors))
+        } else {
+            response.data.ok_or_else(|| ByoError::NoData)
+        }
     }
     /// get the first item in the answer, if present.
     /// This is a convenience method for the simplest case, most
     /// especially for when you query a unique item.
-    pub fn get_first_item<S: Into<String>, Item: DeserializeOwned>(&self, query: S) -> Result<Item> {
-        let mut map: HashMap<String, Item> = self.get_data(query)?;
-        let single = map.drain()
-            .next()
-            .map(|e| e.1)
-            .ok_or_else(|| format_err!("empty data in server response"));
-        single
+    pub fn get_first_item<S: Into<String>, Item: DeserializeOwned>(&self, query: S) -> ByoResult<Item> {
+        let mut map: HashMap<String, Option<Item>> = self.get_data(query)?;
+        let single = map.drain().next().and_then(|e| e.1);
+        single.ok_or_else(|| ByoError::NoData)
     }
 }

@@ -22,9 +22,17 @@ A simple *"bring your own queries and types"* GraphQL client.
 * I want to manage queries as strings in my Rust code
 * I don't know what I'm doing
 
+# Why not use it
+
+* There's already a popular and well tested [GraphQL client in Rust](https://github.com/graphql-rust/graphql-client)
+* I only tested basic queries, no mutations
+* I don't know what I'm doing
+
 # How to use it
 
-The [github example](examples/github-stars/main.rs) demonstrates querying GitHub's GraphQL API to get the number of stars of a repository.
+## Simple query
+
+The [github stars example](examples/github-stars/main.rs) demonstrates querying GitHub's GraphQL API to get the number of stars of a repository.
 
 First create a client, that you may keep and reuse:
 
@@ -33,19 +41,15 @@ let mut graphql_client = GraphqlClient::new("https://api.github.com/graphql")?;
 graphql_client.set_bearer_auth("your-github-api-token");
 ```
 
-You need the structs into which to deserialize the server's answer:
+You need the struct into which to deserialize the server's answer:
 
 ```rust
 #[derive(Deserialize)]
 pub struct Repository {
-    stargazers: RepoStargazers,
-}
-#[derive(Deserialize)]
-pub struct RepoStargazers {
-    totalCount: usize,
+    stargazers: Count,
 }
 ```
-
+(`Count` is a utility struct provided by byo_graphql, it's just `struct Count { totalCount: usize }`)
 
 And you need a query:
 ```rust
@@ -59,15 +63,13 @@ let query = r#"{
 ```
 **note:** in the example's complete code, the query is dynamically built with `format!`, as you'll usually do.
 
-You now can fetch and display the data:
+You now can fetch the data:
 
 ```rust
 let repo: Repository = graphql_client.get_first_item(query)?;
-println!("stars: {}", repo.stargazers.totalCount);
+let stars: usize = repo.stargazers.into();
 ```
 
-# Why not use it
+## Querying a long list
 
-* There's already a popular and well tested [GraphQL client in Rust](https://github.com/graphql-rust/graphql-client)
-* I only tested basic queries, no mutations
-* I don't know what I'm doing
+The [github issues example](examples/github-stars/main.rs) demonstrates how to query a long list with a cursor based exchange.

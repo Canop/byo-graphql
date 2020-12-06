@@ -4,8 +4,12 @@ A simple *"bring your own queries and types"* GraphQL client.
 
 */
 
-mod graphql_client;
+mod client;
+mod error;
+mod list;
 
 pub use {
-    graphql_client::GraphqlClient,
+    client::GraphqlClient,
+    error::*,
+    list::*,
 };

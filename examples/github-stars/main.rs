@@ -1,4 +1,6 @@
 /*!
+This example fetches the number of stars of a github repository.
+
 Run the example with
 
     GITHUB_API_TOKEN=your-github-api-token cargo run --example github-stars
@@ -13,39 +15,34 @@ use {
     serde::Deserialize,
 };
 
-static REPO_GQL_BODY: &str = r#"{
-    stargazers {
-        totalCount
-    }
-}"#;
-
 #[derive(Debug, Deserialize)]
 pub struct Repository {
-    stargazers: RepoStargazers,
+    stargazers: Count,
 }
 
-#[derive(Debug, Deserialize)]
-#[allow(non_snake_case)]
-pub struct RepoStargazers {
-    totalCount: usize,
+pub fn get_repo_stars(owner: &str, name: &str) -> Result<usize> {
+    let mut graphql_client = GraphqlClient::new("https://api.github.com/graphql")?;
+    graphql_client.set_bearer_auth(std::env::var("GITHUB_API_TOKEN")?);
+    let query = format!(
+        // remember: to escape a { or } in a fmt string, you must double it
+        r#"{{ repository(owner: "{}", name: "{}") {} }}"#,
+        owner,
+        name,
+        r#"{ stargazers { totalCount } }"#,
+    );
+    // If you want to see what is exchanged, uncomment those two lines
+    //println!("query: {}", &query);
+    //println!("raw answer: {}", graphql_client.text(&query)?);
+    let repo: Repository = graphql_client.get_first_item(query)?;
+    Ok(repo.stargazers.into())
 }
 
 pub fn main() -> Result<()> {
-    let repo_owner = "Canop";
-    let repo_name = "bacon";
-    let mut graphql_client = GraphqlClient::new("https://api.github.com/graphql")?;
-    graphql_client.set_bearer_auth(std::env::var("GITHUB_API_TOKEN")?);
-    // Let's make our own query
-    // remember: to escape a { or } in a fmt string, you must double it
-    let query = format!(
-        r#"{{ repository(owner: "{}", name: "{}") {} }}"#,
-        repo_owner,
-        repo_name,
-        REPO_GQL_BODY,
+    let (owner, name) = ("Canop", "bacon");
+    println!(
+        "Repository {}/{} has {} stars",
+        owner, name,
+        get_repo_stars(owner, name)?
     );
-    println!("query: {}", &query);
-    println!("raw answer: {}", graphql_client.text(&query)?);
-    let repo: Repository = graphql_client.get_first_item(query)?;
-    println!("stars: {}", repo.stargazers.totalCount);
     Ok(())
 }
