@@ -56,6 +56,8 @@ impl<Item> List<Item> {
     }
 }
 
+/// a structure matching `{ totalCount}`, convenient
+/// when you want the number of items in a collections
 #[derive(Debug, Deserialize, Clone, Copy)]
 #[allow(non_snake_case)]
 pub struct Count {
@@ -66,4 +68,23 @@ impl Into<usize> for Count {
         self.totalCount
     }
 }
+impl Count {
+    /// build the query part for the count of something.
+    ///
+    /// Can be used for a whole query or just a property.
+    /// Example:
+    /// ```
+    /// use byo_graphql::*;
+    /// assert_eq!(
+    ///     Count::query("repositories", "isFork: false"),
+    ///     r#"repositories(isFork: false){ totalCount }"#,
+    /// );
+    /// ```
+    pub fn query(
+        collection_name: &str,
+        filter: &str,
+    ) -> String {
+        format!(r#"{}({}){{ totalCount }}"#, collection_name, filter)
+    }
 
+}

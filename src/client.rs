@@ -65,7 +65,7 @@ impl GraphqlClient {
         if let Some(errors) = response.errors {
             Err(ByoError::Graphql(errors))
         } else {
-            response.data.ok_or_else(|| ByoError::NoData)
+            response.data.ok_or(ByoError::NoData)
         }
     }
     /// get the first item in the answer, if present.
@@ -74,6 +74,6 @@ impl GraphqlClient {
     pub fn get_first_item<S: Into<String>, Item: DeserializeOwned>(&self, query: S) -> ByoResult<Item> {
         let mut map: HashMap<String, Option<Item>> = self.get_data(query)?;
         let single = map.drain().next().and_then(|e| e.1);
-        single.ok_or_else(|| ByoError::NoData)
+        single.ok_or(ByoError::NoData)
     }
 }
