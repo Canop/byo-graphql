@@ -70,4 +70,4 @@ let stars: usize = repo.stargazers.into();
 
 ## Querying a long list
 
-The [github issues example](examples/github-stars/main.rs) demonstrates how to query a long list with a cursor based exchange.
+The [github issues example](examples/github-issues/main.rs) demonstrates how to query a long list with a cursor based exchange.
